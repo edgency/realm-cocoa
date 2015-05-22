@@ -632,11 +632,11 @@ public:
 //}
 
 // still to test:
-//   - keypaths
 //   - keypaths over rlmarray
 //   - Batch array modification
 //   - observe over array keypath
 //   - observe over nil link
+//   - correct object sent in notifications
 @end
 
 // Run tests on a standalone RLMObject instance
@@ -1032,7 +1032,7 @@ public:
         XCTAssertEqualObjects(note->change[NSKeyValueChangeNewKey], NSNull.null);
     }
     AssertChanged(r3, 0U, @NO, NSNull.null);
-    // too many invalidateds being sent
+    // FIXME: too many invalidateds being sent
     [self.realm beginWriteTransaction];
 }
 
