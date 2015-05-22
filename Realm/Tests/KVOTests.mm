@@ -623,6 +623,17 @@ public:
     AssertChanged(r, 0U, @NO, NSNull.null);
 }
 
+- (void)testChangeMiddleOfKeyPathToNonNil {
+    KVOLinkObject2 *obj = [self createLinkObject];
+    KVOLinkObject1 *obj2 = obj.obj;
+    obj.obj = nil;
+    obj2.obj.boolCol = YES;
+
+    KVORecorder r(self, obj, @"obj.obj.boolCol");
+    obj.obj = obj2;
+    AssertChanged(r, 0U, NSNull.null, @YES);
+}
+
 //- (void)testObserveArrayCount {
 //    KVOObject *obj = [self createObject];
 //    KVORecorder r(self, obj, @"arrayCol.@count");
@@ -635,8 +646,9 @@ public:
 //   - keypaths over rlmarray
 //   - Batch array modification
 //   - observe over array keypath
-//   - observe over nil link
 //   - correct object sent in notifications
+//   - correct object number of `invalidate` notifications sent
+//   - rollback of RLMArray changes
 @end
 
 // Run tests on a standalone RLMObject instance
