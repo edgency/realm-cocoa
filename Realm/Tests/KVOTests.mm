@@ -1046,7 +1046,73 @@ public:
     [self.realm beginWriteTransaction];
 }
 
-// linnkview shit
+- (void)testCancelWriteWithArrayChanges {
+    KVOObject *obj = [self createObject];
+    [obj.arrayCol addObject:obj];
+    [self.realm commitWriteTransaction];
+    [self.realm beginWriteTransaction];
+
+    {
+        [obj.arrayCol addObject:obj];
+        KVORecorder r(self, obj, @"arrayCol");
+        [self.realm cancelWriteTransaction];
+        [self.realm beginWriteTransaction];
+        AssertIndexChange(NSKeyValueChangeRemoval, [NSIndexSet indexSetWithIndex:1]);
+    }
+    {
+        [obj.arrayCol removeLastObject];
+        KVORecorder r(self, obj, @"arrayCol");
+        [self.realm cancelWriteTransaction];
+        [self.realm beginWriteTransaction];
+        AssertIndexChange(NSKeyValueChangeInsertion, [NSIndexSet indexSetWithIndex:0]);
+    }
+    {
+        obj.arrayCol[0] = obj;
+        KVORecorder r(self, obj, @"arrayCol");
+        [self.realm cancelWriteTransaction];
+        [self.realm beginWriteTransaction];
+        AssertIndexChange(NSKeyValueChangeReplacement, [NSIndexSet indexSetWithIndex:0]);
+    }
+}
+
+- (void)testCancelWriteWithLinkedObjectedRemoved {
+    KVOLinkObject2 *obj = [self createLinkObject];
+    [obj.array addObject:obj.obj];
+    [self.realm commitWriteTransaction];
+    [self.realm beginWriteTransaction];
+
+    {
+        [self.realm deleteObject:obj.obj];
+
+        KVORecorder r(self, obj, @"array");
+        KVORecorder r2(self, obj, @"obj");
+        [self.realm cancelWriteTransaction];
+        [self.realm beginWriteTransaction];
+        AssertIndexChange(NSKeyValueChangeInsertion, [NSIndexSet indexSetWithIndex:0]);
+        AssertChanged(r2, 0U, NSNull.null, [KVOLinkObject1 allObjectsInRealm:self.realm].firstObject);
+    }
+    {
+        [self.realm deleteObjects:[KVOLinkObject1 allObjectsInRealm:self.realm]];
+
+        KVORecorder r(self, obj, @"array");
+        KVORecorder r2(self, obj, @"obj");
+        [self.realm cancelWriteTransaction];
+        [self.realm beginWriteTransaction];
+        AssertIndexChange(NSKeyValueChangeInsertion, [NSIndexSet indexSetWithIndex:0]);
+        AssertChanged(r2, 0U, NSNull.null, [KVOLinkObject1 allObjectsInRealm:self.realm].firstObject);
+    }
+    {
+        [self.realm deleteObjects:obj.array];
+
+        KVORecorder r(self, obj, @"array");
+        KVORecorder r2(self, obj, @"obj");
+        [self.realm cancelWriteTransaction];
+        [self.realm beginWriteTransaction];
+        AssertIndexChange(NSKeyValueChangeInsertion, [NSIndexSet indexSetWithIndex:0]);
+        AssertChanged(r2, 0U, NSNull.null, [KVOLinkObject1 allObjectsInRealm:self.realm].firstObject);
+    }
+}
+
 // linkview and table selection ordering
 @end
 
