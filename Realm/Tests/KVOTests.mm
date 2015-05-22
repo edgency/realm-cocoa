@@ -643,9 +643,7 @@ public:
 //}
 
 // still to test:
-//   - keypaths over rlmarray
 //   - Batch array modification
-//   - observe over array keypath
 //   - correct object sent in notifications
 //   - correct object number of `invalidate` notifications sent
 //   - rollback of RLMArray changes

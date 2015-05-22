@@ -129,6 +129,8 @@ static void changeArray(__unsafe_unretained RLMArray *const ar, NSKeyValueChange
          forKeyPath:(__unused NSString *)keyPath
             options:(__unused NSKeyValueObservingOptions)options
             context:(__unused void *)context {
+    // FIXME: could probably just do this automatically
+    // FIXME: gives an incorrect error when observing things other than `invalidated`
     @throw RLMException(@"RLMArray cannot be observed directly. Observe via the containing RLMObject.");
 }
 
